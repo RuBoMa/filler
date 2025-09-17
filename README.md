@@ -21,13 +21,13 @@ docker build -t filler .
 2. Run the Docker container
 
 ```bash
-docker run -v "$(pwd)/solution":/filler/solution -it filler
+docker run -v "./solution":/filler/solution -it filler
 ```
 
 3. Build your Rust bot
 
 ```bash
-cd filler/solution/my_robot
+cd solution/my_robot
 cargo build --release
 ```
 
