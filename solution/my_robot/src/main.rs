@@ -15,12 +15,13 @@ fn main() {
         };
 
         let parts: Vec<&str> = anfield_info.split_whitespace().collect();
-        let rows: usize = parts[1].parse().unwrap();
+        let rows: usize = parts[2].parse().unwrap();
 
         // Read Anfield grid
         for _ in 0..rows {
             let _line = lines.next();
         }
+
 
         // Read Piece header
         let piece_info = lines.next().unwrap().unwrap();
@@ -32,7 +33,6 @@ fn main() {
             let _line = lines.next();
         }
 
-        
-        println!("0 0");
+        println!("1 1");
     }
 }
