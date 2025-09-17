@@ -4,30 +4,35 @@ fn main() {
     let stdin = io::stdin();
     let mut lines = stdin.lock().lines();
 
-    let first_line = lines.next().unwrap().unwrap();
-    let (player_char, last_piece_char) = if first_line.contains("p2") {
-        ('$','s')
-    } else {
-        ('@','a')
-    };
-    println!("Player chars: {} {}", player_char, last_piece_char);
+    // Read player number line
+    let _first_line = lines.next().unwrap().unwrap();
 
-    let anfield_info = lines.next().unwrap().unwrap();
-    let parts: Vec<&str> = anfield_info.split_whitespace().collect();
-    let rows: usize = parts[1].parse().unwrap();
-    let cols: usize = parts[2].trim_end_matches(':').parse().unwrap();
-    println!("Anfield size: {} rows x {} cols", rows, cols);
+    loop {
+        // Read Anfield header (e.g. "Anfield 20 15:")
+        let anfield_info = match lines.next() {
+            Some(Ok(line)) if line.starts_with("Anfield") => line,
+            _ => break,
+        };
 
-    let mut anfield: Vec<Vec<char>> = Vec::new();
-    for _ in 0..rows {
-        let line = lines.next().unwrap().unwrap();
-        let row_data: Vec<char> = line[4..].chars().collect();
-        anfield.push(row_data);
+        let parts: Vec<&str> = anfield_info.split_whitespace().collect();
+        let rows: usize = parts[1].parse().unwrap();
+
+        // Read Anfield grid
+        for _ in 0..rows {
+            let _line = lines.next();
+        }
+
+        // Read Piece header
+        let piece_info = lines.next().unwrap().unwrap();
+        let piece_parts: Vec<&str> = piece_info.split_whitespace().collect();
+        let piece_rows: usize = piece_parts[1].parse().unwrap();
+
+        // Read Piece grid
+        for _ in 0..piece_rows {
+            let _line = lines.next();
+        }
+
+        
+        println!("0 0");
     }
-
-    for row in &anfield {
-        println!("{}", row.iter().collect::<String>());
-    }
-
-    println!("0 0");
 }

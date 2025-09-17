@@ -9,3 +9,32 @@
 
 - `Terminator` is a very strong robot so it's optional to beat him.
 - For M1 Macs use `m1_robots` and `m1_game_engine`.
+
+## Running the Filler Project ##
+
+1. Build the docker image
+
+```bash
+docker build -t filler .
+```
+
+2. Run the Docker container
+
+```bash
+docker run -v "$(pwd)/solution":/filler/solution -it filler
+```
+
+3. Build your Rust bot
+
+```bash
+cd filler/solution/my_robot
+cargo build --release
+```
+
+4. Run a match
+
+```bash
+./m1_game_engine -f maps/map01 \
+  -p1 solution/my_robot/target/release/my_robot \
+  -p2 m1_robots/terminator
+```
