@@ -23,20 +23,20 @@ docker build -t filler .
 2. Run the Docker container
 
 ```bash
-docker run -v "$(pwd)/solution":/filler/solution -it filler
+docker run -v "./solution":/filler/solution -it filler
 ```
 
 3. Build your Rust bot
 
 ```bash
-cd filler/solution/my_robot
+cd solution/my_robot
 cargo build --release
 ```
 
 4. Run a match
 
 ```bash
-./m1_game_engine -f maps/map01 \
+./m1_game_engine -f maps/map00 \
   -p1 solution/my_robot/target/release/my_robot \
   -p2 m1_robots/terminator
 ```
