@@ -3,15 +3,15 @@ use crate::piece::*;
 use crate::player::*;
 
 #[derive(Debug, Clone)]
-pub struct Game{
+pub struct Game<'a>{
     pub player: Player,
-    pub field: Field,
+    pub field: &'a Field,
     pub pieces: Vec<Piece>,
     pub turns: usize,
 }
 
-impl Game {
-    pub fn new(player: Player, field: Field) -> Self {
+impl<'a> Game<'a> {
+    pub fn new(player: Player, field: &'a Field) -> Self {
         Self{
             player,
             field,

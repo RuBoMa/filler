@@ -12,12 +12,13 @@ fn main() {
     
     let first_line = lines.next().unwrap().unwrap();
 
-    let pl = player::Player::new(&first_line);
+    let player = player::Player::new(&first_line);
 
     let second_line = lines.next().unwrap().unwrap();
-    let mut f = field::Field::new(&second_line);
-    f.update(&mut lines);
+    let mut field = field::Field::new(&second_line);
+    field.update(&mut lines);
 
+    let g = game::Game::new(player, &field);
     loop {
         let next_line = match lines.next() {
             Some(Ok(line)) => line,
@@ -25,7 +26,7 @@ fn main() {
         };
 
         if next_line.starts_with("Anfield") {
-            f.update(&mut lines);
+            field.update(&mut lines);
         }
         
         if next_line.starts_with("Piece") {

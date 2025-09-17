@@ -34,7 +34,7 @@ cargo build --release
 4. Run a match
 
 ```bash
-./m1_game_engine -f maps/map01 \
+./m1_game_engine -f maps/map00 \
   -p1 solution/my_robot/target/release/my_robot \
   -p2 m1_robots/terminator
 ```
