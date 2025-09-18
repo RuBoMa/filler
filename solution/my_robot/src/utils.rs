@@ -77,27 +77,45 @@ pub fn get_adjacent_cells(field: &Field, placement: (usize, usize), row_index: u
     (next_row_cell, prev_row_cell, next_col_cell, prev_col_cell)
 }
 
-pub fn do_score_calculation(c: &char, cell: char, next_row_cell: Option<char>, prev_row_cell: Option<char>, next_col_cell: Option<char>, prev_col_cell: Option<char>, player_symbol: (char, char)) -> i32 {
+pub fn do_score_calculation(c: &char, cell: char, next_row_cell: Option<char>, prev_row_cell: Option<char>, next_col_cell: Option<char>, prev_col_cell: Option<char>, row_index: usize, col_index: usize, field_row_count: usize, field_col_count: usize, player_symbol: (char, char)) -> i32 {
     let mut score = 0;
-    if *c != 'O' && is_player_cell(Some(cell), player_symbol) {
+    let is_on_edge = if row_index == 0 || row_index == field_row_count - 1 || col_index == 0 || col_index == field_col_count - 1 {
+        true
+    } else {
+        false
+    };
+    let will_place_here = if *c == 'O' {
+        true
+    } else {
+        false
+    };
+    if !will_place_here && is_player_cell(Some(cell), player_symbol) {
         // Alright to place close to other player cells
         score += 1;
-    } else if *c != 'O' && is_enemy_cell(Some(cell), player_symbol) {
+    } else if !will_place_here && is_enemy_cell(Some(cell), player_symbol) {
         // Good to place close to enemy cells (contesting territory)
         score += 2;
-    } else if *c == 'O' && is_enemy_cell(next_row_cell, player_symbol) {
+    } else if will_place_here && is_enemy_cell(next_row_cell, player_symbol) {
         // Great to place very close to enemy cells (contesting territory even more)
         score += 4;
-    } else if *c == 'O' && is_enemy_cell(next_col_cell, player_symbol) {
+    } else if will_place_here && is_enemy_cell(next_col_cell, player_symbol) {
         // Great to place very close to enemy cells (contesting territory even more)
         score += 4;
-    } else if *c == 'O' && is_player_cell(prev_row_cell, player_symbol) {
+    } else if will_place_here && is_enemy_cell(prev_row_cell, player_symbol) {
         // Great to place very close to enemy cells (contesting territory even more)
         score += 4;
-    } else if *c == 'O' && is_enemy_cell(prev_col_cell, player_symbol) {
+    } else if will_place_here && is_enemy_cell(prev_col_cell, player_symbol) {
         // Great to place very close to enemy cells (contesting territory even more)
         score += 4;
     }
+
+    // Currently reduces score very slightly against terminator, but might be useful if built more properly
+    /* if will_place_here && is_on_edge && 
+    (is_enemy_cell(next_row_cell, player_symbol) || is_enemy_cell(next_col_cell, player_symbol) || is_enemy_cell(prev_row_cell, player_symbol) || is_enemy_cell(prev_col_cell, player_symbol)) {
+        // Cutting off enemy entirely
+        score += 10;
+    } */
+
     score
 }
 
