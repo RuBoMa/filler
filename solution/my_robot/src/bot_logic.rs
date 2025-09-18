@@ -1,26 +1,26 @@
 use crate::game::Game;
 use crate::piece::Piece;
 use crate::grid::Grid;
-use crate::utils::check_for_empty_lines;
+use crate::utils::*;
 use crate::field::Field;
-use crate::utils::get_min_max_lines;
+
+pub struct PlacementAndScore {
+    pub placement: (usize, usize),
+    pub score: i32,
+}
 
 pub fn run_bot(game: &Game, piece: &Piece) -> (usize, usize) {
     let min_max_lines = find_true_piece_dimensions(piece);
 
     let valid_placements = find_valid_placements(game.field.clone(), piece, &min_max_lines.0, &min_max_lines.1, game.player.symbol);
-    /* println!("Found {} valid placements", valid_placements.len()); */
 
     if valid_placements.is_empty() {
-        /* println!("No valid placements found, returning (0, 0)"); */
         return (0, 0);
     }
 
-/*     for placement in &valid_placements {
-        println!("Found valid placement at ({}, {})", placement.0, placement.1);
-    } */
+    let evaluated_placements = evaluate_placements(game.field.clone(), piece, valid_placements, &min_max_lines.0, &min_max_lines.1, game.player.symbol);
 
-    (valid_placements[valid_placements.len()-1].0, valid_placements[valid_placements.len()-1].1)
+    get_best_score_placement(&evaluated_placements)
 }
 
 pub fn find_true_piece_dimensions(piece: &Piece) -> ((usize, usize), (usize, usize)) {
@@ -49,8 +49,8 @@ pub fn find_true_piece_dimensions(piece: &Piece) -> ((usize, usize), (usize, usi
     (min_max_rows, min_max_cols)
 }
 
-pub fn find_valid_placements(field: Field, piece: &Piece, min_max_rows: &(usize, usize), min_max_cols: &(usize, usize), player_symbol: (char, char)) -> Vec<(usize, usize)> {
-    let mut valid_placements: Vec<(usize, usize)> = Vec::new();
+pub fn find_valid_placements(field: Field, piece: &Piece, min_max_rows: &(usize, usize), min_max_cols: &(usize, usize), player_symbol: (char, char)) -> Vec<PlacementAndScore> {
+    let mut valid_placements: Vec<PlacementAndScore> = Vec::new();
 
     for (row_index, row) in field.cells().iter().enumerate() {
         if row_index + min_max_rows.1 >= field.row_count() {
@@ -61,8 +61,7 @@ pub fn find_valid_placements(field: Field, piece: &Piece, min_max_rows: &(usize,
                 break;
             }
             if check_for_correct_overlap(field.clone(), piece, (row_index, col_index), min_max_rows, min_max_cols, player_symbol) {
-                /* println!("Found valid placement at ({}, {})", row_index, col_index); */
-                valid_placements.push((col_index, row_index));
+                valid_placements.push(PlacementAndScore { placement: (col_index, row_index), score: 0 });
             }
         }
     }
@@ -82,16 +81,35 @@ pub fn check_for_correct_overlap(field: Field, piece: &Piece, placement: (usize,
                 continue;
             }
             let cell = field.cells()[row_index + placement.0][col_index + placement.1];
-            if (*c == 'O') && 
-            (cell == player_symbol.0 || cell == player_symbol.1) {
+            if *c == 'O' && is_player_cell(Some(cell), player_symbol) {
                 overlap += 1;
                 if overlap > 1 {
                     return false;
                 }
-            } else if *c == 'O' && cell != '.' {
+            } else if *c == 'O' && is_enemy_cell(Some(cell), player_symbol) {
                 return false;
             }
         }
     }
     overlap == 1
+}
+
+pub fn evaluate_placements(field: Field, piece: &Piece, mut valid_placements: Vec<PlacementAndScore>, min_max_rows: &(usize, usize), min_max_cols: &(usize, usize), player_symbol: (char, char)) -> Vec<PlacementAndScore> {
+    for current_placement in &mut valid_placements {
+        for (row_index, row) in piece.cells().iter().enumerate() {
+            if row_index < min_max_rows.0 || row_index > min_max_rows.1 {
+                continue;
+            }
+            for (col_index, c) in row.iter().enumerate() {
+                if col_index < min_max_cols.0 || col_index > min_max_cols.1 {
+                    continue;
+                }
+                let cell = field.cells()[row_index + current_placement.placement.1][col_index + current_placement.placement.0];
+                let (next_row_cell, prev_row_cell, next_col_cell, prev_col_cell) = get_adjacent_cells(&field, current_placement.placement, row_index, col_index);
+
+                current_placement.score += do_score_calculation(c, cell, next_row_cell, prev_row_cell, next_col_cell, prev_col_cell, player_symbol);
+            }
+        }
+    }
+    valid_placements
 }

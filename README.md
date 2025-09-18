@@ -96,8 +96,25 @@ For faster development, you can use the provided quick run script that automatic
 ./quick_run.sh win
 ```
 
+## Many Matches Script
+
+For the sake of thorough testing we've got a script for running X matches in a row and getting stats from the matches:
+
+```bash
+# Run with Windows/Linux game engine
+./many_matches.sh win 50 map02 wall_e
+
+# Run with Mac game engine
+./many_matches.sh mac 250 map02 h2_d2
+
+# Just rebuild and run with defaults (Windows/Linux engine)
+./many_matches.sh win
+```
+
 **Script Arguments:**
 - `[platform]`: `win` for Windows/Linux game engine, `mac` for Mac game engine
+- `[match count]`: How many matches your bot will play against the opponent (defailt: `100`)
+  - (specific to many_matches.sh)
 - `[map]`: Map file to use (default: `map01`)
 - `[opponent]`: Robot opponent (default: `terminator`)
 

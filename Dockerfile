@@ -6,10 +6,12 @@ COPY ./m1_robots		    /filler/m1_robots
 COPY ./linux_game_engine	/filler/linux_game_engine
 COPY ./m1_game_engine	    /filler/m1_game_engine
 COPY ./quick_run.sh		    /filler/quick_run.sh
+COPY ./many_matches.sh	    /filler/many_matches.sh
 
 WORKDIR /filler/
 
 # Make the quick run script executable
 RUN chmod +x /filler/quick_run.sh
+RUN chmod +x /filler/many_matches.sh
 
 ENTRYPOINT /bin/bash

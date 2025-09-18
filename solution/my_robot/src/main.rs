@@ -15,7 +15,12 @@ fn main() {
     // For testing a specific scenario
     let args = std::env::args().collect::<Vec<String>>();
     if args.len() > 1 && args[1] == "test" {
-        run_test();
+        if args.len() > 2 && (args[2] == "p1" || args[2] == "p2") {
+            println!("Running test...");
+            run_test(&args[2]);
+        } else {
+            println!("Invalid arguments, must run with p1 or p2 as second argument");
+        }
         return;
     }
 
