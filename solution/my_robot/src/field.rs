@@ -1,10 +1,9 @@
 use std::io::Error;
-use crate::grid::Grid;
+use crate::grid::{Size, Grid};
 
 #[derive(Debug, Clone)]
 pub struct Field {
-    pub rows: usize,
-    pub cols: usize,
+    pub size: Size,
     pub cells: Vec<Vec<char>>,
 }
 
@@ -19,27 +18,27 @@ impl Field {
         let rows: usize = parts[2].parse().expect("Invalid row count");
 
         let cells = vec![vec!['.'; cols]; rows];
-        Field { rows, cols, cells }
+        Field { size: Size{width: cols, height: rows}, cells }
     }
 
     pub fn update<I: Iterator<Item = Result<String, Error>>>(&mut self, lines: &mut I) {
         let _ = lines.next(); // skip column headers
 
-        for r in 0..self.rows() {
+        for r in 0..self.height() {
             let line = match lines.next() {
                 Some(Ok(l)) => l.trim_end().to_string(),
                 _ => panic!("Unexpected end of input while reading row {}", r),
             };
 
-            if line.chars().count() < 4 + self.cols() {
+            if line.chars().count() < 4 + self.width() {
                 panic!( "Invalid row {}: expected at least {} characters, got {}",
-                    r, 4 + self.cols(), line.chars().count());
+                    r, 4 + self.width(), line.chars().count());
             }
 
-            let row_data: Vec<char> = line[4..].chars().take(self.cols()).collect();
-            if row_data.len() != self.cols() {
+            let row_data: Vec<char> = line[4..].chars().take(self.width()).collect();
+            if row_data.len() != self.width() {
                 panic!( "Row {} has incorrect number of columns: expected {}, got {}",
-                    r, self.cols(), row_data.len());
+                    r, self.width(), row_data.len());
             }
             self.cells_mut()[r] = row_data;
         }
@@ -47,8 +46,8 @@ impl Field {
 }
 
 impl Grid for Field {
-    fn rows(&self) -> usize { self.rows }
-    fn cols(&self) -> usize { self.cols }
+    fn height(&self) -> usize { self.size.height }
+    fn width(&self) -> usize { self.size.width }
     fn cells(&self) -> &Vec<Vec<char>> { &self.cells }
     fn cells_mut(&mut self) -> &mut Vec<Vec<char>> { &mut self.cells }
 }

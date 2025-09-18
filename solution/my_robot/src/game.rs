@@ -1,17 +1,17 @@
-use crate::field::*;
-use crate::piece::*;
-use crate::player::*;
+pub use crate::field::*;
+pub use crate::piece::*;
+pub use crate::player::*;
 
 #[derive(Debug, Clone)]
-pub struct Game<'a>{
+pub struct Game{
     pub player: Player,
-    pub field: &'a Field,
+    pub field: Field,
     pub pieces: Vec<Piece>,
     pub turns: usize,
 }
 
-impl<'a> Game<'a> {
-    pub fn new(player: Player, field: &'a Field) -> Self {
+impl Game {
+    pub fn new(player: Player, field: Field) -> Self {
         Self{
             player,
             field,
@@ -20,7 +20,18 @@ impl<'a> Game<'a> {
         }
     }
 
-    pub fn process_input(&mut self, line: &str) -> Option<(usize, usize)>{
-        None
+    pub fn place_piece(&mut self, p: Piece) -> (usize, usize) {
+        self.turns += 1;
+        let (sym_1, sym_2) = self.player.symbol; // get player symbols
+        // use piece.trimmed.rows and piece.timmed.cols to get sessions of the grid
+        // maybe a field fn get_section(x, y, height, width)
+
+        // check number of symbols in section
+        // if section.symbol count < 1, move to next section
+        // if section.symbol count + piece.symbol_count > height * width, move to next section
+        // else try placing piece, if number of overlap symbol == 1, ok. else move to next section
+
+        // return section x, y minus peice offset
+        (0, 0)
     }
 }

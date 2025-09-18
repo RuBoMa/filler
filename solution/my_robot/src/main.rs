@@ -5,20 +5,21 @@ mod player;
 mod grid;
 
 use std::io::{self, BufRead};
+use game::*;
 
 fn main() {
     let stdin = io::stdin();
     let mut lines = stdin.lock().lines();
     
     let first_line = lines.next().unwrap().unwrap();
-
-    let player = player::Player::new(&first_line);
-
     let second_line = lines.next().unwrap().unwrap();
-    let mut field = field::Field::new(&second_line);
-    field.update(&mut lines);
 
-    let g = game::Game::new(player, &field);
+    let mut g = game::Game::new(
+        Player::new(&first_line),
+        Field::new(&second_line));
+    
+    g.field.update(&mut lines);
+    
     loop {
         let next_line = match lines.next() {
             Some(Ok(line)) => line,
@@ -26,13 +27,14 @@ fn main() {
         };
 
         if next_line.starts_with("Anfield") {
-            field.update(&mut lines);
+            g.field.update(&mut lines);
         }
         
         if next_line.starts_with("Piece") {
-            let mut pi = piece::Piece::new(&next_line);
-            pi.update(&mut lines);
-            println!("0 0\n");
+            let mut p = Piece::new(&next_line);
+            p.update(&mut lines);
+            let (x, y) = g.place_piece(p);
+            print!("{} {}\n", x, y);
         }
     }
 }
