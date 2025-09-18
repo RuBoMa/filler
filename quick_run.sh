@@ -8,7 +8,7 @@ set -e  # Exit on any error
 
 # Default values
 PLATFORM=""
-MAP="map01"
+MAP="map00"
 OPPONENT="terminator"
 
 # Parse arguments

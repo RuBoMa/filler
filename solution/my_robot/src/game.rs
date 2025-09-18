@@ -1,26 +1,31 @@
 use crate::field::*;
 use crate::piece::*;
 use crate::player::*;
+use std::io::Error;
 
 #[derive(Debug, Clone)]
-pub struct Game<'a>{
+pub struct Game {
     pub player: Player,
-    pub field: &'a Field,
+    pub field: Field,
     pub pieces: Vec<Piece>,
-    pub turns: usize,
+    pub current_turn: usize,
 }
 
-impl<'a> Game<'a> {
-    pub fn new(player: Player, field: &'a Field) -> Self {
+impl Game {
+    pub fn new(player: Player, field: Field) -> Self {
         Self{
             player,
             field,
             pieces: Vec::new(),
-            turns: 0,
+            current_turn: 0,
         }
     }
 
-    pub fn process_input(&mut self, line: &str) -> Option<(usize, usize)>{
+/*     pub fn process_input(&mut self, line: &str) -> Option<(usize, usize)>{
         None
+    } */
+
+    pub fn update_field<I: Iterator<Item = Result<String, Error>>>(&mut self, lines: &mut I) {
+        self.field.update(lines);
     }
 }
