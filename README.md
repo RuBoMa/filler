@@ -46,7 +46,7 @@ sed -i 's/\r$//' /filler/maps/map00
 ```bash
 ./linux_game_engine -f maps/map00 \
   -p1 solution/my_robot/target/release/my_robot \
-  -p2 linux_robots/h2_d2
+  -p2 linux_robots/wall_e
 ```
 
 ```bash

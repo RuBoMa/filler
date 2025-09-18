@@ -39,10 +39,9 @@ impl Game {
 
         let mut best: Option<Placement> = None;
 
-        for y in 0..=self.field.size.height - p.trimmed_size.height {
-            for x in 0..=self.field.size.width - p.trimmed_size.width {
-                let pos = Pos { x, y };
-                if let Some(p_valid) = self.check_placement(&p, pos) {
+        for y in p.offset.0..=self.field.size.height - p.trimmed_size.height {
+            for x in p.offset.1..=self.field.size.width - p.trimmed_size.width {
+                if let Some(p_valid) = self.check_placement(&p, Pos { x, y }) {
                     if best.as_ref().map_or(true, |b| p_valid.score > b.score) {
                         best = Some(p_valid);
                     }
@@ -52,7 +51,7 @@ impl Game {
 
         self.pieces.push(p);
         if let Some(best_pos) = best {
-            self.player.score += 1; // or use best_pos.score if that's what you want
+            self.player.score += 1;
             (best_pos.pos.x as i32 - best_pos.piece.offset.1 as i32, 
                 best_pos.pos.y as i32 - best_pos.piece.offset.0 as i32)
         } else {
