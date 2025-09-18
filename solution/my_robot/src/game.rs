@@ -16,6 +16,7 @@ pub struct Game{
 pub struct Placement {
     pub pos: Pos,
     pub score: i32,
+    pub piece: Piece,
 }
 
 impl Game {
@@ -29,7 +30,7 @@ impl Game {
         }
     }
 
-    pub fn place_piece(&mut self, p: Piece) -> (usize, usize) {
+    pub fn place_piece(&mut self, p: Piece) -> (i32, i32) {
         self.turns += 1;
         
         if p.trimmed_size.height > self.field.size.height || p.trimmed_size.width > self.field.size.width {
@@ -52,7 +53,8 @@ impl Game {
         self.pieces.push(p);
         if let Some(best_pos) = best {
             self.player.score += 1; // or use best_pos.score if that's what you want
-            (best_pos.pos.x, best_pos.pos.y)
+            (best_pos.pos.x as i32 - best_pos.piece.offset.1 as i32, 
+                best_pos.pos.y as i32 - best_pos.piece.offset.0 as i32)
         } else {
             (0, 0)
         }
@@ -83,7 +85,7 @@ impl Game {
                 score += self.get_cell_score(piece_cell, Pos{ y: pos.y + dy, x: pos.x + dx });
             }
         }
-        Some(Placement { pos: Pos{ x: pos.x - piece.offset.1, y: pos.y - piece.offset.0 }, score })
+        Some(Placement { pos, score, piece: piece.to_owned() })
     }
 
     pub fn get_cell_score(&self, piece_cell: char, pos: Pos) -> i32 {
