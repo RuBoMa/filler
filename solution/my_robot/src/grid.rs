@@ -4,20 +4,6 @@ pub struct Size {
     pub height: usize,
 }
 
-impl Size {
-    pub fn new(width: usize, height: usize) -> Self {
-        Size { width, height }
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.width == 0 || self.height == 0
-    }
-
-    pub fn area(&self) -> usize {
-        self.width * self.height
-    }
-}
-
 pub trait Grid {
     fn height(&self) -> usize;
     fn width(&self) -> usize;

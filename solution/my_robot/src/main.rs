@@ -14,8 +14,9 @@ fn main() {
     let first_line = lines.next().unwrap().unwrap();
     let second_line = lines.next().unwrap().unwrap();
 
+    let (player, enemy) = Player::new(&first_line);
     let mut g = game::Game::new(
-        Player::new(&first_line),
+        player, enemy,
         Field::new(&second_line));
     
     g.field.update(&mut lines);
@@ -34,7 +35,7 @@ fn main() {
             let mut p = Piece::new(&next_line);
             p.update(&mut lines);
             let (x, y) = g.place_piece(p);
-            print!("{} {}\n", x, y);
+            println!("{} {}", x, y);
         }
     }
 }

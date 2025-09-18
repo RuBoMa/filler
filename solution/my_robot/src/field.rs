@@ -7,6 +7,12 @@ pub struct Field {
     pub cells: Vec<Vec<char>>,
 }
 
+#[derive(Debug, Clone)]
+pub struct Pos {
+    pub y: usize,
+    pub x: usize,
+}
+
 impl Field {
     pub fn new(header: &str) -> Self {
 
