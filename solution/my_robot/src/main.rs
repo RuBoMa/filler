@@ -32,7 +32,7 @@ fn main() {
     let second_line = lines.next().unwrap().unwrap();
 
     let (player, enemy) = Player::new(&first_line);
-    let mut g = game::Game::new(
+    let mut g = Game::new(
         player, enemy,
         Field::new(&second_line));
     
@@ -51,6 +51,8 @@ fn main() {
         if next_line.starts_with("Piece") {
             let mut p = Piece::new(&next_line);
             p.update(&mut lines);
+
+            //let (x, y) = bot_logic::run_bot(&g, &p);
             let (x, y) = g.place_piece(p);
             println!("{} {}", x, y);
         }

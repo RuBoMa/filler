@@ -88,7 +88,7 @@ impl Game {
     }
 
     pub fn get_cell_score(&self, piece_cell: char, pos: Pos) -> i32 {
-        let will_place_here = piece_cell != '.';
+        let will_place_here = piece_cell == 'O';
 
         match will_place_here {
             false => {
@@ -98,10 +98,21 @@ impl Game {
                 else { 0 }
             },
             true => {
-                if pos.y as i32 - 1 >= 0 && self.enemy.is_mine( &self.field.cells[pos.y-1][pos.x] ) { 4 }
-                else if  pos.x as i32 - 1 >= 0 && self.enemy.is_mine( &self.field.cells[pos.y][pos.x-1] ) { 4 } 
-                else if  pos.y + 1 < self.field.size.height && self.enemy.is_mine( &self.field.cells[pos.y+1][pos.x] ) { 4 } 
-                else if  pos.x + 1 < self.field.size.width && self.enemy.is_mine( &self.field.cells[pos.y][pos.x+1] ) { 4 } 
+                if pos.y as i32 - 1 >= 0 &&
+                    self.enemy.is_mine( &self.field.cells[pos.y-1][pos.x] ) ||
+                    pos.y == 0 { 4 }
+                    
+                else if pos.x as i32 - 1 >= 0 &&
+                    self.enemy.is_mine( &self.field.cells[pos.y][pos.x-1] ) ||
+                    pos.x== 0 { 4 } 
+
+                else if pos.y + 1 < self.field.size.height &&
+                    self.enemy.is_mine( &self.field.cells[pos.y+1][pos.x] ) ||
+                    pos.y == self.field.size.height -1 { 4 }
+
+                else if pos.x + 1 < self.field.size.width &&
+                    self.enemy.is_mine( &self.field.cells[pos.y][pos.x+1] ) ||
+                    pos.x == self.field.size.width -1 { 4 } 
                 else { 0 }
             },
         }
