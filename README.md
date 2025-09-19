@@ -23,7 +23,11 @@ docker build -t filler .
 2. Run the Docker container
 
 ```bash
-docker run -v "$(pwd)/solution:/filler/solution" -it filler
+docker run -it \
+  -v "$(pwd)/solution:/filler/solution" \
+  -v "$(pwd)/logs:/filler/logs" \
+  -v "$(pwd)/maps:/filler/maps" \
+  filler
 ```
 
 3. Build your Rust bot
@@ -46,7 +50,7 @@ Output log to a text file
 ./m1_game_engine -f maps/map00 \
   -p1 solution/my_robot/target/release/my_robot \
   -p2 m1_robots/h2_d2 \
-  >> game_log.txt 2>&1
+  > /filler/logs/game_log.txt 2>&1
 ```
 
 ### Windows Setup
