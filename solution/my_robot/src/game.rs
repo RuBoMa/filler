@@ -1,6 +1,7 @@
 pub use crate::field::*;
 pub use crate::piece::*;
 pub use crate::player::*;
+pub use crate::utils::*;
 
 #[derive(Debug, Clone)]
 pub struct Game{
@@ -37,11 +38,13 @@ impl Game {
             return (0, 0);
         }
 
+        let enemy_pos = get_average_enemy_pos(&self.field, self.player.symbol);
+
         let mut best: Option<Placement> = None;
 
         for y in p.offset.0..=self.field.size.height - p.trimmed_size.height {
             for x in p.offset.1..=self.field.size.width - p.trimmed_size.width {
-                if let Some(p_valid) = self.check_placement(&p, Pos { x, y }) {
+                if let Some(p_valid) = self.check_placement(&p, Pos { x, y }, &enemy_pos) {
                     if best.as_ref().map_or(true, |b| p_valid.score > b.score) {
                         best = Some(p_valid);
                     }
@@ -59,7 +62,7 @@ impl Game {
         }
     }
     
-    pub fn check_placement(&self, piece: &Piece, pos: Pos) -> Option<Placement> {
+    pub fn check_placement(&self, piece: &Piece, pos: Pos, enemy_pos: &Pos) -> Option<Placement> {
         let mut overlap = 0;
 
         for (dy, row) in piece.trimmed_cells.iter().enumerate() {
@@ -81,38 +84,37 @@ impl Game {
         let mut score = 0;
         for (dy, row) in piece.trimmed_cells.iter().enumerate() {
             for (dx, &piece_cell) in row.iter().enumerate() {
-                score += self.get_cell_score(piece_cell, Pos{ y: pos.y + dy, x: pos.x + dx });
+                score += self.get_cell_score(piece_cell, Pos{ y: pos.y + dy, x: pos.x + dx }, enemy_pos);
             }
         }
         Some(Placement { pos, score, piece: piece.to_owned() })
     }
 
-    pub fn get_cell_score(&self, piece_cell: char, pos: Pos) -> i32 {
+    pub fn get_cell_score(&self, piece_cell: char, cell_pos: Pos, enemy_pos: &Pos) -> i32 {
         let will_place_here = piece_cell == 'O';
+
+        // For clarity
+        let (prev_y_cell, next_y_cell, prev_x_cell, next_x_cell) = get_adjacent_cells(&self.field, &cell_pos);
 
         match will_place_here {
             false => {
-                let cur_cell = self.field.cells[pos.y][pos.x];
+                let cur_cell = self.field.cells[cell_pos.y][cell_pos.x];
                 if self.player.is_mine(&cur_cell) { 1 }
                 else if self.enemy.is_mine(&cur_cell) { 2 }
                 else { 0 }
             },
             true => {
-                if pos.y as i32 - 1 >= 0 &&
-                    self.enemy.is_mine( &self.field.cells[pos.y-1][pos.x] ) ||
-                    pos.y == 0 { 4 }
+                if prev_y_cell.is_some() &&
+                    self.enemy.is_mine( &prev_y_cell.unwrap() ) { 4 }
                     
-                else if pos.x as i32 - 1 >= 0 &&
-                    self.enemy.is_mine( &self.field.cells[pos.y][pos.x-1] ) ||
-                    pos.x== 0 { 4 } 
+                else if next_y_cell.is_some() &&
+                    self.enemy.is_mine( &next_y_cell.unwrap() ) { 4 } 
 
-                else if pos.y + 1 < self.field.size.height &&
-                    self.enemy.is_mine( &self.field.cells[pos.y+1][pos.x] ) ||
-                    pos.y == self.field.size.height -1 { 4 }
+                else if prev_x_cell.is_some() &&
+                    self.enemy.is_mine( &prev_x_cell.unwrap() ) { 4 }
 
-                else if pos.x + 1 < self.field.size.width &&
-                    self.enemy.is_mine( &self.field.cells[pos.y][pos.x+1] ) ||
-                    pos.x == self.field.size.width -1 { 4 } 
+                else if next_x_cell.is_some() &&
+                    self.enemy.is_mine( &next_x_cell.unwrap() ) { 4 } 
                 else { 0 }
             },
         }

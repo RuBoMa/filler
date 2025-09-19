@@ -4,6 +4,10 @@ use crate::grid::Grid;
 use crate::utils::*;
 use crate::field::Field;
 
+// ================================================================================
+// Old code, remove when sure everything's been implemented under the new structure
+// ================================================================================
+
 pub struct PlacementAndScore {
     pub placement: (usize, usize),
     pub score: i32,
@@ -105,9 +109,9 @@ pub fn evaluate_placements(field: Field, piece: &Piece, mut valid_placements: Ve
                     continue;
                 }
                 let cell = field.cells()[row_index + current_placement.placement.1][col_index + current_placement.placement.0];
-                let (next_row_cell, prev_row_cell, next_col_cell, prev_col_cell) = get_adjacent_cells(&field, current_placement.placement, row_index, col_index);
+                //let (next_row_cell, prev_row_cell, next_col_cell, prev_col_cell) = get_adjacent_cells(&field, current_placement.placement, row_index, col_index);
 
-                current_placement.score += do_score_calculation(c, cell, next_row_cell, prev_row_cell, next_col_cell, prev_col_cell, row_index, col_index, field.height(), field.width(), player_symbol);
+                //current_placement.score += do_score_calculation(c, cell, next_row_cell, prev_row_cell, next_col_cell, prev_col_cell, row_index, col_index, field.height(), field.width(), player_symbol);
             }
         }
     }

@@ -3,6 +3,7 @@ use crate::grid::Grid;
 use std::iter::Iterator;
 use crate::field::Field;
 use crate::bot_logic::PlacementAndScore;
+use crate::game::Pos;
 
 pub fn check_for_empty_lines(piece: &Piece, start_at_min: bool, line_length: usize, checking_rows: bool) -> Vec<usize> {
     let mut empty_lines: Vec<usize> = Vec::new();
@@ -55,26 +56,49 @@ pub fn get_min_max_lines(empty_lines: &Vec<usize>, piece_size: usize) -> (usize,
     (min_line, max_line)
 }
 
-pub fn get_adjacent_cells(field: &Field, placement: (usize, usize), row_index: usize, col_index: usize) -> (Option<char>, Option<char>, Option<char>, Option<char>) {
-    let mut next_row_cell: Option<char> = None;
-    let mut prev_row_cell: Option<char> = None;
-    let mut next_col_cell: Option<char> = None;
-    let mut prev_col_cell: Option<char> = None;
+pub fn get_average_enemy_pos(field: &Field, player_symbol: (char, char)) -> Pos {
+    let mut enemy_average_pos: Pos = Pos { y: 0, x: 0 };
+    let mut all_enemy_pos: Vec<Pos> = Vec::new();
+    let mut enemy_cell_count: usize = 0;
+    for y in 0..field.size.height {
+        for x in 0..field.size.width {
+            let cell = Some(field.cells[y][x]);
+            if is_enemy_cell(cell, player_symbol) {
+                all_enemy_pos.push(Pos { y, x });
+                enemy_cell_count += 1;
+            }
+        }
+    }
+    for pos in all_enemy_pos.iter() {
+        enemy_average_pos.x += pos.x;
+        enemy_average_pos.y += pos.y;
+    }
+    enemy_average_pos.x /= enemy_cell_count;
+    enemy_average_pos.y /= enemy_cell_count;
+    enemy_average_pos
+}
 
-    if placement.1 + row_index > 0 {
-        prev_row_cell = Some(field.cells()[placement.1 + row_index - 1][placement.0 + col_index]);
+
+pub fn get_adjacent_cells(field: &Field, placement: &Pos) -> (Option<char>, Option<char>, Option<char>, Option<char>) {
+    let mut prev_y_cell: Option<char> = None;
+    let mut next_y_cell: Option<char> = None;
+    let mut prev_x_cell: Option<char> = None;
+    let mut next_x_cell: Option<char> = None;
+
+    if placement.y > 0 {
+        prev_y_cell = Some(field.cells()[placement.y - 1][placement.x]);
     }
-    if placement.1 + row_index + 1 < field.height() {
-        next_row_cell = Some(field.cells()[placement.1 + row_index + 1][placement.0 + col_index]);
+    if placement.y + 1 < field.height() {
+        next_y_cell = Some(field.cells()[placement.y + 1][placement.x]);
     }
-    if placement.0 + col_index > 0 {
-        prev_col_cell = Some(field.cells()[placement.1 + row_index][placement.0 + col_index - 1]);
+    if placement.x > 0 {
+        prev_x_cell = Some(field.cells()[placement.y][placement.x - 1]);
     }
-    if placement.0 + col_index + 1 < field.width() {
-        next_col_cell = Some(field.cells()[placement.1 + row_index][placement.0 + col_index + 1]);
+    if placement.x + 1 < field.width() {
+        next_x_cell = Some(field.cells()[placement.y][placement.x + 1]);
     }
 
-    (next_row_cell, prev_row_cell, next_col_cell, prev_col_cell)
+    (prev_y_cell, next_y_cell, prev_x_cell, next_x_cell)
 }
 
 pub fn do_score_calculation(c: &char, cell: char, next_row_cell: Option<char>, prev_row_cell: Option<char>, next_col_cell: Option<char>, prev_col_cell: Option<char>, row_index: usize, col_index: usize, field_row_count: usize, field_col_count: usize, player_symbol: (char, char)) -> i32 {
