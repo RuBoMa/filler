@@ -41,6 +41,14 @@ cargo build --release
   -p2 m1_robots/terminator
 ```
 
+Output log to a text file
+```bash
+./m1_game_engine -f maps/map00 \
+  -p1 solution/my_robot/target/release/my_robot \
+  -p2 m1_robots/h2_d2 \
+  >> game_log.txt 2>&1
+```
+
 ### Windows Setup
 
 1. Build the docker image
@@ -74,6 +82,12 @@ cd ..
 
 ```bash
 ./linux_game_engine -f maps/map00 -p1 solution/my_robot/target/release/my_robot -p2 linux_robots/wall_e
+```
+
+Output log to a text file
+```bash
+./linux_game_engine -f maps/map00 -p1 solution/my_robot/target/release/my_robot -p2 linux_robots/wall_e
+  >> game_log.txt 2>&1
 ```
 
 **Windows Troubleshooting:**
