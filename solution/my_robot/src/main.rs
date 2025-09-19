@@ -3,11 +3,28 @@ mod field;
 mod piece;
 mod player;
 mod grid;
+mod bot_logic;
+mod utils;
+mod basic_test;
 
 use std::io::{self, BufRead};
 use game::*;
 
+use basic_test::run_test;
+
 fn main() {
+    // For testing a specific scenario
+    let args = std::env::args().collect::<Vec<String>>();
+    if args.len() > 1 && args[1] == "test" {
+        if args.len() > 2 && (args[2] == "p1" || args[2] == "p2") {
+            println!("Running test...");
+            run_test(&args[2]);
+        } else {
+            println!("Invalid arguments, must run with p1 or p2 as second argument");
+        }
+        return;
+    }
+
     let stdin = io::stdin();
     let mut lines = stdin.lock().lines();
     

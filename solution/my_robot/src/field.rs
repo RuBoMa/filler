@@ -20,11 +20,11 @@ impl Field {
             .trim_end_matches(':')
             .split_whitespace()
             .collect();
-        let cols: usize = parts[1].parse().expect("Invalid col count");
-        let rows: usize = parts[2].parse().expect("Invalid row count");
+        let col_count: usize = parts[1].parse().expect("Invalid col count");
+        let row_count: usize = parts[2].parse().expect("Invalid row count");
 
-        let cells = vec![vec!['.'; cols]; rows];
-        Field { size: Size{width: cols, height: rows}, cells }
+        let cells = vec![vec!['.'; col_count]; row_count];
+        Field { size: Size{ height: row_count, width: col_count }, cells }
     }
 
     pub fn update<I: Iterator<Item = Result<String, Error>>>(&mut self, lines: &mut I) {

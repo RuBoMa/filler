@@ -1,0 +1,11 @@
+[workspace]
+members = [
+    "solution/my_robot",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+
+[workspace.dependencies]

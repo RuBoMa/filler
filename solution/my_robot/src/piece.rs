@@ -18,13 +18,13 @@ impl Piece {
             .trim_end_matches(':')
             .split_whitespace()
             .collect();
-        let cols: usize = parts[1].parse().expect("Invalid col count");
-        let rows: usize = parts[2].parse().expect("Invalid row count");
+        let col_count: usize = parts[1].parse().expect("Invalid col count");
+        let row_count: usize = parts[2].parse().expect("Invalid row count");
 
-        let cells = vec![vec!['.'; cols]; rows];
+        let cells = vec![vec!['.'; col_count]; row_count];
 
         Piece { 
-            size: Size{width: cols, height: rows}, cells,
+            size: Size{width: col_count, height: row_count}, cells,
             trimmed_size: Size{width: 0, height: 0}, trimmed_cells: vec![],
             symbol_count: 0, offset: (0,0)
         }
