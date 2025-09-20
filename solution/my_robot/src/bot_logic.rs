@@ -1,13 +1,13 @@
-use crate::game::Game;
+/* use crate::game::Game;
 use crate::piece::Piece;
 use crate::grid::Grid;
 use crate::utils::*;
-use crate::field::Field;
+use crate::field::Field; */
 
 // ================================================================================
 // Old code, remove when sure everything's been implemented under the new structure
 // ================================================================================
-
+/* 
 pub struct PlacementAndScore {
     pub placement: (usize, usize),
     pub score: i32,
@@ -116,4 +116,4 @@ pub fn evaluate_placements(field: Field, piece: &Piece, mut valid_placements: Ve
         }
     }
     valid_placements
-}
+} */
