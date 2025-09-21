@@ -1,3 +1,9 @@
+mod field;
+mod piece;
+mod player;
+mod grid;
+mod visualizer;
+
 use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -6,10 +12,6 @@ use std::time::Duration;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
-use sdl2::rect::Rect;
-use sdl2::render::TextureCreator;
-use sdl2::ttf::Font;
-use sdl2::video::WindowContext;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -19,43 +21,19 @@ fn main() {
     }
     let filename = &args[1];
 
-    let file = File::open(filename).unwrap_or_else(|err| {
-        eprintln!("Failed to open file {}: {}", filename, err);
-        std::process::exit(1);
-    });
-    let reader = BufReader::new(file);
-
-    let lines: Vec<String> = reader.lines().filter_map(Result::ok).collect();
-    let first_line = lines.first().cloned().unwrap_or_else(|| "Log file is empty".to_string());
+    let lines = read_lines_from_file(filename);
+    let mut visualizer = visualizer::Visualizer::new(lines);
 
     // SDL2 Initialization
-    let sdl_context = sdl2::init().unwrap();
-    let video_subsystem = sdl_context.video().unwrap();
-    let ttf_context = sdl2::ttf::init().unwrap();
+    let (mut canvas, mut event_pump, ttf_context) = init_sdl2("Visualizer", 1200, 900);
 
-    let window = video_subsystem
-        .window("Visualizer Test", 800, 600)
-        .position_centered()
-        .build()
-        .unwrap();
+    
+    // Create texture creator for font rendering
+    let texture_creator = canvas.texture_creator();
 
-    let mut canvas = window.into_canvas().present_vsync().build().unwrap();
-    let texture_creator: TextureCreator<WindowContext> = canvas.texture_creator();
-
-    // Load font
+    // Load font once
     let font_path = "assets/Roboto-Regular.ttf";
-    let font: Font = ttf_context.load_font(font_path, 24).unwrap();
-
-    let surface = font
-        .render(&first_line)
-        .blended(Color::RGB(255, 255, 255))
-        .unwrap();
-    let texture = texture_creator.create_texture_from_surface(&surface).unwrap();
-
-    let texture_query = texture.query();
-    let target = Rect::new(50, 50, texture_query.width, texture_query.height);
-
-    let mut event_pump = sdl_context.event_pump().unwrap();
+    let font = ttf_context.load_font(font_path, 12).unwrap();
 
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -65,6 +43,18 @@ fn main() {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => break 'running,
+
+                // Navigation: Left/right arrow to move between turns
+                Event::KeyDown {
+                    keycode: Some(Keycode::Right),
+                    ..
+                } => visualizer.next_turn(),
+
+                Event::KeyDown {
+                    keycode: Some(Keycode::Left),
+                    ..
+                } => visualizer.prev_turn(),
+
                 _ => {}
             }
         }
@@ -72,11 +62,53 @@ fn main() {
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
 
-        // Draw the text
-        canvas.copy(&texture, None, Some(target)).unwrap();
+        visualizer.draw(&mut canvas, &font, &texture_creator);
 
         canvas.present();
-
         std::thread::sleep(Duration::from_millis(16));
     }
+}
+
+use std::io;
+fn read_lines_from_file(filename: &str) -> impl Iterator<Item = Result<String, io::Error>> {
+    let file = File::open(filename).unwrap_or_else(|err| {
+        eprintln!("Failed to open file {}: {}", filename, err);
+        std::process::exit(1);
+    });
+
+    let reader = BufReader::new(file);
+    reader.lines()
+}
+
+use sdl2::render::Canvas;
+use sdl2::video::Window;
+use sdl2::EventPump;
+use sdl2::ttf::Sdl2TtfContext;
+
+fn init_sdl2(
+    title: &str,
+    width: u32,
+    height: u32,
+) -> (Canvas<Window>, EventPump, Sdl2TtfContext) {
+    let sdl_context = sdl2::init().expect("Failed to initialize SDL2");
+    let video_subsystem = sdl_context.video().expect("Failed to get video subsystem");
+    let ttf_context = sdl2::ttf::init().expect("Failed to initialize TTF");
+
+    let window = video_subsystem
+        .window(title, width, height)
+        .position_centered()
+        .build()
+        .expect("Failed to create window");
+
+    let canvas = window
+        .into_canvas()
+        .present_vsync()
+        .build()
+        .expect("Failed to create canvas");
+
+    let event_pump = sdl_context
+        .event_pump()
+        .expect("Failed to create event pump");
+
+    (canvas, event_pump, ttf_context)
 }
