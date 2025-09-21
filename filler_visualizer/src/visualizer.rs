@@ -144,18 +144,18 @@ impl Visualizer {
             let px = 880;
             let py = 250;
 
-            draw_text(
-                canvas,
-                texture_creator,
-                font,
-                &format!("Player {} placed: ", player),
-                880,
-                py,
-                Color { r: 255, g: 255, b: 255, a: 0 },
-            );
+            let col = match player {
+                1 => p1_col,
+                2 => p2_col,
+                _ => Color { r: 255, g: 255, b: 255, a: 0 },
+            };
 
-            let cell_size = (200 / piece.size.width.max(1))
-                                .min(200 / piece.size.height.max(1));
+            draw_text(canvas, texture_creator, font,
+                &format!("Player {} placing: ", player),
+                880, py, col);
+
+            let cell_size = (150 / piece.size.width.max(1))
+                                .min(150 / piece.size.height.max(1)).min(50);
             let margin = 1;
 
             for (row_idx, row) in piece.cells.iter().enumerate() {
@@ -172,7 +172,7 @@ impl Visualizer {
                     );
 
                     let color = match ch {
-                        'O' => Color::RGB(255, 255, 0),
+                        'O' => col,
                         _   => Color::RGB(50, 50, 50),
                     };
 
