@@ -82,11 +82,22 @@ impl Visualizer {
                                 .min(max_grid_size / field.size.height.max(1));
         let margin = 1;
 
+        let mut p1_score = 0;
+        let mut p2_score = 0;
+        let p1_col = Color::RGB(255, 100, 100);
+        let p2_col = Color::RGB(100, 100, 255);
+
         // Draw field grid at (50, 50)
         for (row_idx, row) in field.cells.iter().enumerate() {
             for (col_idx, &ch) in row.iter().enumerate() {
                 let x = 50 + col_idx as u32 * cell_size as u32;
                 let y = 50 + row_idx as u32 * cell_size as u32;
+                
+                match ch {
+                    '@' | 'a' => p1_score += 1,
+                    '$' | 's' => p2_score += 1,
+                    _ => {}
+                }
 
                 let rect = Rect::new(
                     x as i32 + margin,
@@ -109,47 +120,49 @@ impl Visualizer {
         }
 
         // Draw text: Player info & Turn
-        draw_text(
-            canvas,
-            texture_creator,
-            font,
-            &format!("Player 1: {}", self.players[0].path),
-            880,
-            50,
-        );
-
-        draw_text(
-            canvas,
-            texture_creator,
-            font,
-            &format!("Player 2: {}", self.players[1].path),
-            880,
-            80,
-        );
-
-        draw_text(
-            canvas,
-            texture_creator,
-            font,
+        draw_text(canvas, texture_creator, font,
             &format!("Turn: {} / {}", self.turn + 1, self.fields.len()),
-            880,
-            110,
-        );
+            880, 50, Color { r: 255, g: 255, b: 255, a: 0 });
+
+        draw_text(canvas, texture_creator, font,
+            &format!("Player 1: {}", self.players[0].path),
+            880, 110, p1_col);
+        draw_text(canvas, texture_creator, font,
+            &format!("   score: {}", p1_score),
+            880, 140, p1_col);
+
+        draw_text(canvas, texture_creator, font,
+            &format!("Player 2: {}", self.players[1].path),
+            880, 170, p2_col);
+        draw_text(canvas, texture_creator, font,
+            &format!("   score: {}", p2_score),
+            880, 200, p2_col);
+
 
         // Draw piece grid (100x100 max size)
         if let Some((player, piece)) = self.pieces.get(self.turn) {
             let px = 880;
-            let py = 150;
+            let py = 250;
 
-            let cell_size = (100 / piece.size.width.max(1))
-                                .min(100 / piece.size.height.max(1));
+            draw_text(
+                canvas,
+                texture_creator,
+                font,
+                &format!("Player {} placed: ", player),
+                880,
+                py,
+                Color { r: 255, g: 255, b: 255, a: 0 },
+            );
+
+            let cell_size = (200 / piece.size.width.max(1))
+                                .min(200 / piece.size.height.max(1));
             let margin = 1;
 
             for (row_idx, row) in piece.cells.iter().enumerate() {
                 for (col_idx, &ch) in row.iter().enumerate() {
 
                     let x = px + col_idx as i32 * cell_size as i32;
-                    let y = py + row_idx as i32 * cell_size as i32;
+                    let y = py + 30 + row_idx as i32 * cell_size as i32;
 
                     let rect = Rect::new(
                         x + margin,
@@ -167,15 +180,6 @@ impl Visualizer {
                     canvas.fill_rect(rect).ok();
                 }
             }
-
-            draw_text(
-                canvas,
-                texture_creator,
-                font,
-                &format!("Player {} placed: ", player),
-                880,
-                py + 110,
-            );
         }
     }
     
@@ -200,10 +204,11 @@ fn draw_text(
     text: &str,
     x: i32,
     y: i32,
+    color: Color,
 ) {
     let surface = font
         .render(text)
-        .blended(Color::RGB(255, 255, 255))
+        .blended(color)
         .unwrap();
 
     let texture = texture_creator
