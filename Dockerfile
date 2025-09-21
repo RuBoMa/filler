@@ -1,11 +1,5 @@
 FROM rust:1.75
 
-RUN apt-get update && apt-get install -y \
-    libsdl2-dev \
-    libsdl2-ttf-dev \
-    libgl1-mesa-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 COPY ./maps			        /filler/maps
 COPY ./linux_robots		    /filler/linux_robots
 COPY ./m1_robots		    /filler/m1_robots

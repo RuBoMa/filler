@@ -64,7 +64,11 @@ docker build -t filler .
 2. Run the Docker container
 
 ```powershell
-docker run --rm -v C:\path\to\filler\solution:/filler/solution -it filler
+docker run -it `
+  -v "${PWD}\solution:/filler/solution" `
+  -v "${PWD}\logs:/filler/logs" `
+  -v "${PWD}\maps:/filler/maps" `
+  filler
 ```
 
 **Note:** Replace `C:\path\to\filler` with your actual project path.
@@ -90,8 +94,7 @@ cd ..
 
 Output log to a text file
 ```bash
-./linux_game_engine -f maps/map00 -p1 solution/my_robot/target/release/my_robot -p2 linux_robots/wall_e
-  >> game_log.txt 2>&1
+./linux_game_engine -f maps/map02 -p1 solution/my_robot/target/release/my_robot -p2 linux_robots/wall_e > /filler/logs/game_log.txt 2>&1
 ```
 
 **Windows Troubleshooting:**
