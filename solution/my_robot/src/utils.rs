@@ -60,6 +60,7 @@ pub fn get_min_max_lines(empty_lines: &Vec<usize>, piece_size: usize) -> (usize,
     (min_line, max_line)
 }
 
+// returns the adjacent cells for a given placement
 pub fn get_adjacent_cells(
     field: &Field,
     placement: (usize, usize),

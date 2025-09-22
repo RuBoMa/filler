@@ -28,7 +28,7 @@ impl Game {
             turns: 0,
         }
     }
-
+    // try to place the piece and return the best position or (0,0) if no valid placement found
     pub fn place_piece(&mut self, p: Piece) -> (i32, i32) {
         self.turns += 1;
 
@@ -62,6 +62,7 @@ impl Game {
         }
     }
 
+    // Check if placing the piece at the given position is valid
     pub fn check_placement(&self, piece: &Piece, pos: Pos) -> Option<Placement> {
         let mut overlap = 0;
 
@@ -101,6 +102,7 @@ impl Game {
         })
     }
 
+    // Calculate score for placing a piece cell at a given position
     pub fn get_cell_score(&self, piece_cell: char, pos: Pos) -> i32 {
         let will_place_here = piece_cell == 'O';
 
