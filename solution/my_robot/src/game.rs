@@ -29,7 +29,7 @@ impl Game {
             turns: 0,
         }
     }
-
+    // try to place the piece and return the best position or (0,0) if no valid placement found
     pub fn place_piece(&mut self, p: Piece) -> (i32, i32) {
         self.turns += 1;
 
@@ -63,6 +63,7 @@ impl Game {
         (best.pos.x as i32 - best.piece.offset.1 as i32, best.pos.y as i32 - best.piece.offset.0 as i32)
     }
 
+    // Check if placing the piece at the given position is valid
     pub fn check_placement(&self, piece: &Piece, pos: Pos) -> Option<Placement> {
         let mut overlap = 0;
 
