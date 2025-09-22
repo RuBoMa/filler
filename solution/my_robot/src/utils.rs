@@ -330,22 +330,154 @@ pub fn check_if_prev_pieces_would_fit(field: &Field, piece: &Piece, pos: &Pos, p
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::piece::Piece;
+    use crate::grid::Size;
 
-    fn create_test_piece(cells: Vec<Vec<char>>) -> Piece {
-        let height = cells.len();
-        let width = if height > 0 { cells[0].len() } else { 0 };
-
-        Piece {
-            size: crate::grid::Size { width, height },
-            cells,
-            trimmed_size: crate::grid::Size {
-                width: 0,
-                height: 0,
+    fn create_test_field() -> Field {
+        Field {
+            size: Size {
+                width: 4,
+                height: 4,
             },
-            trimmed_cells: vec![],
-            symbol_count: 0,
+            cells: vec![
+                vec!['.', 'a', '.', '.'],
+                vec!['.', '.', '.', '.'],
+                vec!['.', '.', 's', '.'],
+                vec!['.', '.', '.', '.'],
+            ],
+        }
+    }
+
+    fn create_test_piece() -> Piece {
+        Piece {
+            size: Size {
+                width: 2,
+                height: 2,
+            },
+            cells: vec![vec!['O', '.'], vec!['.', 'O']],
+            trimmed_size: Size {
+                width: 2,
+                height: 2,
+            },
+            trimmed_cells: vec![vec!['O', '.'], vec!['.', 'O']],
+            symbol_count: 2,
             offset: (0, 0),
         }
+    }
+
+    fn create_test_placement(pos: Pos, score: i32) -> Placement {
+        Placement {
+            pos,
+            piece: create_test_piece(),
+            score,
+        }
+    }
+
+    #[test]
+    fn test_check_if_touching_enemy_cell() {
+        // Field with player 'a' at (0,1) and enemy 's' at (2,2)
+        let field = create_test_field();
+        let player_symbol = ('a', '@');
+
+        // They are not adjacent, so should return false
+        let result = check_if_touching_enemy_cell(&field, player_symbol);
+        assert_eq!(result, false);
+
+        // Create a field where they are adjacent
+        let field_adjacent = Field {
+            size: Size {
+                width: 4,
+                height: 4,
+            },
+            cells: vec![
+                vec!['.', 'a', 's', '.'], // Player and enemy adjacent
+                vec!['.', '.', '.', '.'],
+                vec!['.', '.', '.', '.'],
+                vec!['.', '.', '.', '.'],
+            ],
+        };
+
+        let result_adjacent = check_if_touching_enemy_cell(&field_adjacent, player_symbol);
+        assert_eq!(result_adjacent, true);
+    }
+
+    #[test]
+    fn test_evaluate_placement_for_enemy_distance() {
+        let field = create_test_field();
+        let enemy_pos = Pos { x: 2, y: 2 }; // Enemy at (2,2)
+        let current_turn = 1;
+
+        let mut placements = vec![
+            create_test_placement(Pos { x: 0, y: 0 }, 0), // Far from enemy
+            create_test_placement(Pos { x: 1, y: 1 }, 0), // Close to enemy
+        ];
+
+        evaluate_placement_for_enemy_distance(&field, &mut placements, enemy_pos, current_turn);
+
+        // The closer placement should have higher score
+        assert!(placements[1].score > placements[0].score);
+        // Both should have positive scores
+        assert!(placements[0].score > 0);
+        assert!(placements[1].score > 0);
+    }
+
+    #[test]
+    fn test_evaluate_placement_for_wall_distance() {
+        let field = Field {
+            size: Size {
+                width: 6,
+                height: 6,
+            },
+            cells: vec![
+                vec!['.'; 6],
+                vec!['.'; 6],
+                vec!['.'; 6],
+                vec!['.'; 6],
+                vec!['.'; 6],
+                vec!['.'; 6],
+            ],
+        };
+
+        let mut placements = vec![
+            create_test_placement(Pos { x: 0, y: 0 }, 0), // True corner (distance 0 from walls)
+            create_test_placement(Pos { x: 2, y: 2 }, 0), // Center (distance 2+ from walls)
+        ];
+
+        evaluate_placement_for_wall_distance(&field, &mut placements);
+
+        // Corner placement should have higher score than center
+        assert!(placements[0].score > placements[1].score);
+        // Both should have positive scores
+        assert!(placements[0].score > 0);
+        assert!(placements[1].score > 0);
+    }
+
+    #[test]
+    fn test_is_enemy_cell() {
+        let player_symbol = ('a', '@');
+
+        // Test enemy cells
+        assert_eq!(is_enemy_cell(Some('s'), player_symbol), true);
+        assert_eq!(is_enemy_cell(Some('$'), player_symbol), true);
+
+        // Test non-enemy cells
+        assert_eq!(is_enemy_cell(Some('a'), player_symbol), false); // Player cell
+        assert_eq!(is_enemy_cell(Some('@'), player_symbol), false); // Player cell
+        assert_eq!(is_enemy_cell(Some('.'), player_symbol), false); // Empty cell
+        assert_eq!(is_enemy_cell(None, player_symbol), false); // No cell
+    }
+
+    #[test]
+    fn test_is_player_cell() {
+        let player_symbol = ('a', '@');
+
+        // Test player cells
+        assert_eq!(is_player_cell(Some('a'), player_symbol), true);
+        assert_eq!(is_player_cell(Some('@'), player_symbol), true);
+
+        // Test non-player cells
+        assert_eq!(is_player_cell(Some('s'), player_symbol), false); // Enemy cell
+        assert_eq!(is_player_cell(Some('$'), player_symbol), false); // Enemy cell
+        assert_eq!(is_player_cell(Some('.'), player_symbol), false); // Empty cell
+        assert_eq!(is_player_cell(None, player_symbol), false); // No cell
     }
 }
