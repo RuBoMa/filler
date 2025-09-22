@@ -1,5 +1,5 @@
 [workspace]
-members = [
+members = [ "filler_visualizer",
     "solution/my_robot",
 ]
 resolver = "2"

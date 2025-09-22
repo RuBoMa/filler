@@ -5,7 +5,12 @@ use crate::game::{Pos, Placement};
 
 use std::iter::Iterator;
 
-pub fn check_for_empty_lines(piece: &Piece, start_at_min: bool, line_length: usize, checking_rows: bool) -> Vec<usize> {
+pub fn check_for_empty_lines(
+    piece: &Piece,
+    start_at_min: bool,
+    line_length: usize,
+    checking_rows: bool,
+) -> Vec<usize> {
     let mut empty_lines: Vec<usize> = Vec::new();
 
     // Box because otherwise the .rev() version is a different type
@@ -21,7 +26,7 @@ pub fn check_for_empty_lines(piece: &Piece, start_at_min: bool, line_length: usi
         } else {
             piece.cells().iter().all(|row| row[i] == '.')
         };
-        
+
         if is_empty {
             empty_lines.push(i);
         } else {
@@ -34,15 +39,15 @@ pub fn check_for_empty_lines(piece: &Piece, start_at_min: bool, line_length: usi
 
 pub fn get_min_max_lines(empty_lines: &Vec<usize>, piece_size: usize) -> (usize, usize) {
     let mut min_line = 0;
-    let mut max_line = piece_size-1;
+    let mut max_line = piece_size - 1;
     let mut previous_empty = None;
 
     for empty_line in empty_lines {
         if previous_empty.is_some() && empty_line - previous_empty.unwrap() > 1 {
-            max_line = empty_line-1;
+            max_line = empty_line - 1;
             break;
         } else if previous_empty.is_none() && *empty_line > 0 {
-            max_line = empty_line-1;
+            max_line = empty_line - 1;
             break;
         }
         min_line = *empty_line;
@@ -104,18 +109,30 @@ pub fn get_adjacent_cells(field: &Field, placement: &Pos) -> (Option<char>, Opti
     (prev_y_cell, next_y_cell, prev_x_cell, next_x_cell)
 }
 
-pub fn do_score_calculation(c: &char, cell: char, next_row_cell: Option<char>, prev_row_cell: Option<char>, next_col_cell: Option<char>, prev_col_cell: Option<char>, row_index: usize, col_index: usize, field_row_count: usize, field_col_count: usize, player_symbol: (char, char)) -> i32 {
+pub fn do_score_calculation(
+    c: &char,
+    cell: char,
+    next_row_cell: Option<char>,
+    prev_row_cell: Option<char>,
+    next_col_cell: Option<char>,
+    prev_col_cell: Option<char>,
+    row_index: usize,
+    col_index: usize,
+    field_row_count: usize,
+    field_col_count: usize,
+    player_symbol: (char, char),
+) -> i32 {
     let mut score = 0;
-    let is_on_edge = if row_index == 0 || row_index == field_row_count - 1 || col_index == 0 || col_index == field_col_count - 1 {
+    let is_on_edge = if row_index == 0
+        || row_index == field_row_count - 1
+        || col_index == 0
+        || col_index == field_col_count - 1
+    {
         true
     } else {
         false
     };
-    let will_place_here = if *c == 'O' {
-        true
-    } else {
-        false
-    };
+    let will_place_here = if *c == 'O' { true } else { false };
     if !will_place_here && is_player_cell(Some(cell), player_symbol) {
         // Alright to place close to other player cells
         score += 1;
@@ -137,7 +154,7 @@ pub fn do_score_calculation(c: &char, cell: char, next_row_cell: Option<char>, p
     }
 
     // Currently reduces score very slightly against terminator, but might be useful if built more properly
-    /* if will_place_here && is_on_edge && 
+    /* if will_place_here && is_on_edge &&
     (is_enemy_cell(next_row_cell, player_symbol) || is_enemy_cell(next_col_cell, player_symbol) || is_enemy_cell(prev_row_cell, player_symbol) || is_enemy_cell(prev_col_cell, player_symbol)) {
         // Cutting off enemy entirely
         score += 10;
@@ -296,7 +313,11 @@ pub fn evaluate_placement_for_enclosing_cells(field: &Field, placements: &mut Ve
 }
 
 pub fn is_enemy_cell(cell: Option<char>, player_symbol: (char, char)) -> bool {
-    if cell.is_none() || cell.unwrap() == '.' || cell.unwrap() == player_symbol.0 || cell.unwrap() == player_symbol.1 {
+    if cell.is_none()
+        || cell.unwrap() == '.'
+        || cell.unwrap() == player_symbol.0
+        || cell.unwrap() == player_symbol.1
+    {
         return false;
     }
     true
@@ -427,4 +448,60 @@ pub fn check_if_prev_pieces_would_fit(field: &Field, piece: &Piece, pos: &Pos, p
 
     score_multiplier = placable_prev_pieces as f32 / total_prev_pieces as f32;
     score_multiplier
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::piece::Piece;
+
+    fn create_test_piece(cells: Vec<Vec<char>>) -> Piece {
+        let height = cells.len();
+        let width = if height > 0 { cells[0].len() } else { 0 };
+
+        Piece {
+            size: crate::grid::Size { width, height },
+            cells,
+            trimmed_size: crate::grid::Size {
+                width: 0,
+                height: 0,
+            },
+            trimmed_cells: vec![],
+            symbol_count: 0,
+            offset: (0, 0),
+        }
+    }
+
+    #[test]
+    fn test_check_for_empty_lines_basic() {
+        // Test basic functionality: empty rows from top and columns from left
+        let cells = vec![
+            vec!['.', '.', '.'],
+            vec!['.', '.', '.'],
+            vec!['O', '.', '.'],
+        ];
+        let piece = create_test_piece(cells);
+
+        // Should find 2 empty rows from top
+        let empty_lines = check_for_empty_lines(&piece, true, piece.height(), true);
+        assert_eq!(empty_lines, vec![0, 1]);
+
+        // Should find no empty columns from left (first column has 'O')
+        let empty_lines = check_for_empty_lines(&piece, true, piece.width(), false);
+        assert_eq!(empty_lines, Vec::<usize>::new());
+    }
+
+    #[test]
+    fn test_check_for_empty_lines_stops_at_non_empty() {
+        // Should stop when encountering first non-empty line
+        let cells = vec![
+            vec!['.', '.', '.'],
+            vec!['O', '.', '.'], // Non-empty row - should stop here
+            vec!['.', '.', '.'], // This empty row should be ignored
+        ];
+        let piece = create_test_piece(cells);
+
+        let empty_lines = check_for_empty_lines(&piece, true, piece.height(), true);
+        assert_eq!(empty_lines, vec![0]); // Only first row, stops at second
+    }
 }
