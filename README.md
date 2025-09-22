@@ -1,143 +1,76 @@
-# Filler docker image
+# filler
+In this project, we implement a bot to play the Filler game.
+A game where two bots compete to fill the most territory on a grid-based map (Anfield) by taking turns placing pieces of various shapes.
 
-- To build the image `docker build -t filler .`
-- To run the container `docker run -v "$(pwd)/solution":/filler/solution -it filler`. This instruction will open a terminal in the container, the directory `solution` will be mounted in the container as well.
-- Example of a command in the container `./linux_game_engine -f maps/map01 -p1 linux_robots/bender -p2 linux_robots/terminator`
-- Your solution should be inside the `solution` directory so it will be mounted and compiled inside the container and it will be able to be run in the game engine.
+Each turn, a bot must place a peice on the map according to specific rules:
+- The piece must touch one and only one of the bot's existing cell on the map.
+- The piece cannot overlap with any of the opponent's cells or go out of bounds.
+- The piece must fit entirely within the map.
 
-## Notes
+This project is part of the curriculum at [01 edu school](https://01edu.ai/).
+The game engine and robots are provided by the school, and we have to implement our own bot in Rust to win against the provided bots.
 
-- `Terminator` is a very strong robot so it's optional to beat him.
-- For M1 Macs use `m1_robots` and `m1_game_engine`.
+We have implemented a visualizer to watch the matches and analyze the game logs.
 
-## Running the Filler Project ##
 
-### macOS/Linux Setup
+## Prerequisites
+The project is designed by the school to run in a Docker container where the game_engine will run the solution bot against other bots.
+- [Docker](https://www.docker.com/get-started)
 
-1. Build the docker image
+If you wish to test the solution bot locally, you will need:
+- [Rust and Cargo](https://rustup.rs/)
 
+## Understanding the setup
+The game_engine runs each bot as a separate process and communicates with them via standard input and output.
+
+At the start of the game, the game_engine sends the player information to each bot:
 ```bash
-docker build -t filler .
+$$$ exec p1 : [path_to_bot_executable]
 ```
 
-2. Run the Docker container
-
+After that, the game_engine sends the map and piece information to each bot in turns.
 ```bash
-docker run -it \
-  -v "$(pwd)/solution:/filler/solution" \
-  -v "$(pwd)/logs:/filler/logs" \
-  -v "$(pwd)/maps:/filler/maps" \
-  filler
+Anfield 20 15:
+    01234567890123456789
+000 ....................
+001 ....................
+002 .........@..........
+003 ....................
+004 ....................
+005 ....................
+006 ....................
+007 ....................
+008 ....................
+009 ....................
+010 ....................
+011 ....................
+012 .........$..........
+013 ....................
+014 ....................
+Piece 4 2:
+OOOO
+.OOO
 ```
 
-3. Build your Rust bot
-
+And the bot has to respond with the coordinates where it wants to place the piece:
 ```bash
-cd solution/my_robot
-cargo build --release
+3 5
 ```
 
-4. Run a match
+The game_engine will validate the move and update the map accordingly before sending the updated map and the next piece to the next bot.
+If the game_engine detects an invlaid move, the bot responsible will not be able to make any more moves while the other bot can continue to play until there are no more valid moves for either bot.
+It a bot crashes or fails to respond in time, it loses the game.
 
-```bash
-./m1_game_engine -f maps/map00 \
-  -p1 solution/my_robot/target/release/my_robot \
-  -p2 m1_robots/terminator
-```
+## Running the game with Docker
+Read the [instructions](filler_docker.md) to run the game_engine with Docker.
+In the instructions, we provide commands that bind the local directories to the container directories.
+This allows us to easily access the solution code, maps, and logs from the host machine.
 
-Output log to a text file
-```bash
-./m1_game_engine -f maps/map00 \
-  -p1 solution/my_robot/target/release/my_robot \
-  -p2 m1_robots/h2_d2 \
-  > /filler/logs/game_log.txt 2>&1
-```
+## Running the visualizer
+Read the [instructions](./filler_visualizer/README.md) for visualizer.
+Using the log files generated from the game engine, the visualizer can replay the game step by step.
 
-### Windows Setup
-
-1. Build the docker image
-
-```powershell
-docker build -t filler .
-```
-
-2. Run the Docker container
-
-```powershell
-docker run -it `
-  -v "${PWD}\solution:/filler/solution" `
-  -v "${PWD}\logs:/filler/logs" `
-  -v "${PWD}\maps:/filler/maps" `
-  filler
-```
-
-**Note:** Replace `C:\path\to\filler` with your actual project path.
-
-3. Build your Rust bot
-
-```bash
-cd /filler/solution/my_robot
-cargo build --release
-```
-
-Then return to root for the next command:
-```bash
-cd ..
-cd ..
-```
-
-4. Run a match
-
-```bash
-./linux_game_engine -f maps/map00 -p1 solution/my_robot/target/release/my_robot -p2 linux_robots/wall_e
-```
-
-Output log to a text file
-```bash
-./linux_game_engine -f maps/map02 -p1 solution/my_robot/target/release/my_robot -p2 linux_robots/wall_e > /filler/logs/game_log.txt 2>&1
-```
-
-**Windows Troubleshooting:**
-- If you get "invalid reference format" error, make sure to use the full Windows path format with backslashes
-- The `--rm` flag automatically removes the container when you exit
-- Use `linux_game_engine` and `linux_robots` on Windows (not `m1_*` versions)
-
-## Quick Run Script
-
-For faster development, you can use the provided quick run script that automatically rebuilds your bot and starts a game:
-
-```bash
-# Run with Windows/Linux game engine
-./quick_run.sh win map01 terminator
-
-# Run with Mac game engine
-./quick_run.sh mac map02 bender
-
-# Just rebuild and run with defaults (Windows/Linux engine)
-./quick_run.sh win
-```
-
-## Many Matches Script
-
-For the sake of thorough testing we've got a script for running X matches in a row and getting stats from the matches:
-
-```bash
-# Run with Windows/Linux game engine
-./many_matches.sh win 50 map02 wall_e
-
-# Run with Mac game engine
-./many_matches.sh mac 250 map02 h2_d2
-
-# Just rebuild and run with defaults (Windows/Linux engine)
-./many_matches.sh win
-```
-
-**Script Arguments:**
-- `[platform]`: `win` for Windows/Linux game engine, `mac` for Mac game engine
-- `[match count]`: How many matches your bot will play against the opponent (defailt: `100`)
-  - (specific to many_matches.sh)
-- `[map]`: Map file to use (default: `map01`)
-- `[opponent]`: Robot opponent (default: `terminator`)
-
-**Available opponents:** `bender`, `h2_d2`, `terminator`, `wall_e`
-**Available maps:** `map00`, `map01`, `map02`
+## Collaborators 
+- Allen [@AllenLeeyn](https://github.com/AllenLeeyn)
+- Roope [@RuBoMa](https://github.com/RuBoMa)
+- Johannes [@JSundb](https://github.com/JSundb)
