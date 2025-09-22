@@ -229,12 +229,6 @@ pub fn get_center_of_piece(field: &Field, placement: &Pos, piece: &Piece) -> Pos
     while y >= field.height() {
         y -= 1;
     }
-    while x < 0 {
-        x += 1;
-    }
-    while y < 0 {
-        y += 1;
-    }
     Pos { y, x }
 }
 
