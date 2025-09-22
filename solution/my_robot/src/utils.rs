@@ -220,13 +220,6 @@ pub fn is_player_cell(cell: Option<char>, player_symbol: (char, char)) -> bool {
     false
 }
 
-pub fn is_empty_cell(cell: Option<char>) -> bool {
-    if cell.is_some() && cell.unwrap() == '.' {
-        return true;
-    }
-    false
-}
-
 pub fn get_center_of_piece(field: &Field, placement: &Pos, piece: &Piece) -> Pos {
     let mut x = placement.x + (piece.trimmed_size.width + piece.offset.1)/2;
     let mut y = placement.y + (piece.trimmed_size.height + piece.offset.0)/2;
@@ -360,38 +353,5 @@ mod tests {
             symbol_count: 0,
             offset: (0, 0),
         }
-    }
-
-    #[test]
-    fn test_check_for_empty_lines_basic() {
-        // Test basic functionality: empty rows from top and columns from left
-        let cells = vec![
-            vec!['.', '.', '.'],
-            vec!['.', '.', '.'],
-            vec!['O', '.', '.'],
-        ];
-        let piece = create_test_piece(cells);
-
-        // Should find 2 empty rows from top
-        let empty_lines = check_for_empty_lines(&piece, true, piece.height(), true);
-        assert_eq!(empty_lines, vec![0, 1]);
-
-        // Should find no empty columns from left (first column has 'O')
-        let empty_lines = check_for_empty_lines(&piece, true, piece.width(), false);
-        assert_eq!(empty_lines, Vec::<usize>::new());
-    }
-
-    #[test]
-    fn test_check_for_empty_lines_stops_at_non_empty() {
-        // Should stop when encountering first non-empty line
-        let cells = vec![
-            vec!['.', '.', '.'],
-            vec!['O', '.', '.'], // Non-empty row - should stop here
-            vec!['.', '.', '.'], // This empty row should be ignored
-        ];
-        let piece = create_test_piece(cells);
-
-        let empty_lines = check_for_empty_lines(&piece, true, piece.height(), true);
-        assert_eq!(empty_lines, vec![0]); // Only first row, stops at second
     }
 }
