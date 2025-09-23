@@ -12,6 +12,7 @@ pub struct Piece {
 }
 
 impl Piece {
+    // Create a new Piece instance with given dimensions
     pub fn new(header: &str) -> Self {
         let parts: Vec<&str> = header.trim_end_matches(':').split_whitespace().collect();
         let col_count: usize = parts[1].parse().expect("Invalid col count");
@@ -34,7 +35,7 @@ impl Piece {
             offset: (0, 0),
         }
     }
-
+    // Trim empty rows and columns from the piece
     fn trim_cells(&mut self) {
         let mut top = 0;
         let mut bottom = self.height();
@@ -64,7 +65,7 @@ impl Piece {
         };
         self.offset = (top, left);
     }
-
+    // Update the piece's cells from input lines
     pub fn update<I: Iterator<Item = Result<String, Error>>>(&mut self, lines: &mut I) {
         for r in 0..self.height() {
             let line = match lines.next() {

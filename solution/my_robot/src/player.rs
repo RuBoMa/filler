@@ -6,6 +6,7 @@ pub struct Player {
 }
 
 impl Player {
+    // constructor - creates new Player instances
     pub fn new(input: &str) -> (Self, Self) {
         let p1 = Player {
             _num: 1,
@@ -23,7 +24,7 @@ impl Player {
             (p2, p1)
         }
     }
-
+    // instance method - checks if a character belongs to this player
     pub fn is_mine(&self, c: &char) -> bool {
         self.symbol.0 == *c || self.symbol.1 == *c
     }
