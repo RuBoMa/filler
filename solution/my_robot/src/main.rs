@@ -3,7 +3,6 @@ mod field;
 mod piece;
 mod player;
 mod grid;
-mod bot_logic;
 mod utils;
 
 use std::io::{self, BufRead};
@@ -22,7 +21,7 @@ fn main() {
         Field::new(&second_line));
     
     g.field.update(&mut lines);
-    
+
     loop {
         let next_line = match lines.next() {
             Some(Ok(line)) => line,
@@ -37,7 +36,6 @@ fn main() {
             let mut p = Piece::new(&next_line);
             p.update(&mut lines);
 
-            //let (x, y) = bot_logic::run_bot(&g, &p);
             let (x, y) = g.place_piece(p);
             println!("{} {}", x, y);
         }

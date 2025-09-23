@@ -72,6 +72,24 @@ Using the log files generated from the game engine, the visualizer can replay th
 
 ## Commands for audits
 ```
+./linux_game_engine -f maps/map01 -p1 linux_robots/bender -p2 linux_robots/terminator
+
+./linux_game_engine -f maps/map00 -p1 solution/my_robot/target/release/my_robot -p2 linux_robots/wall_e > /filler/logs/game_log.txt 2>&1
+./linux_game_engine -f maps/map00 -p2 solution/my_robot/target/release/my_robot -p1 linux_robots/wall_e > /filler/logs/game_log.txt 2>&1
+
+./linux_game_engine -f maps/map01 -p1 solution/my_robot/target/release/my_robot -p2 linux_robots/h2_d2 > /filler/logs/game_log.txt 2>&1
+./linux_game_engine -f maps/map01 -p2 solution/my_robot/target/release/my_robot -p1 linux_robots/h2_d2 > /filler/logs/game_log.txt 2>&1
+
+./linux_game_engine -f maps/map02 -p1 solution/my_robot/target/release/my_robot -p2 linux_robots/bender > /filler/logs/game_log.txt 2>&1
+./linux_game_engine -f maps/map02 -p2 solution/my_robot/target/release/my_robot -p1 linux_robots/bender > /filler/logs/game_log.txt 2>&1
+
+./linux_game_engine -f maps/map02 -p1 solution/my_robot/target/release/my_robot -p2 linux_robots/terminator > /filler/logs/game_log.txt 2>&1
+./linux_game_engine -f maps/map02 -p2 solution/my_robot/target/release/my_robot -p1 linux_robots/terminator > /filler/logs/game_log.txt 2>&1
+```
+
+```
+./m1_game_engine -f maps/map01 -p1 m1_robots/bender -p2 m1_robots/terminator
+
 ./m1_game_engine -f maps/map00 -p1 solution/my_robot/target/release/my_robot -p2 m1_robots/wall_e > /filler/logs/game_log.txt 2>&1
 ./m1_game_engine -f maps/map00 -p2 solution/my_robot/target/release/my_robot -p1 m1_robots/wall_e > /filler/logs/game_log.txt 2>&1
 

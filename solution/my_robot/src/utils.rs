@@ -57,8 +57,6 @@ pub fn evaluate_placements(field: &Field, mut valid_placements: Vec<Placement>, 
     let has_touched_enemy_cell = check_if_touching_enemy_cell(&field, player_symbol);
     if !has_touched_enemy_cell {
         evaluate_placement_for_enemy_distance(&field, &mut valid_placements, enemy_pos, current_turn);
-    } else {
-        evaluate_placement_for_wall_distance(&field, &mut valid_placements);
     }
     let found_enclosing_cells = evaluate_placement_for_enclosing_cells(&field, &mut valid_placements, player_symbol);
     if !found_enclosing_cells {
@@ -115,27 +113,7 @@ pub fn evaluate_placement_for_enemy_distance(field: &Field, placements: &mut Vec
     }
 }
 
-pub fn evaluate_placement_for_wall_distance(field: &Field, placements: &mut Vec<Placement>) {
-    // Evaluating whether the placement is closing in on the wall or not
-    for placement in placements {
-        let max_points = 24;
-        let center = get_center_of_piece(field, &placement.pos, &placement.piece);
-
-        // Will add a check for whether or not it'd be preferable to move to the wall or not
-        // Right now this reduces score a lot, but next time I work on this I'll add checks for whether or not closing in on the wall actually would cut off the enemy or not
-
-        let distance_to_wall_up = (center.y).abs_diff(0);
-        let distance_to_wall_down = (center.y).abs_diff(field.height() - 1);
-        let distance_to_wall_left = (center.x).abs_diff(0);
-        let distance_to_wall_right = (center.x).abs_diff(field.width() - 1);
-
-        let distance_to_wall = distance_to_wall_up.min(distance_to_wall_down).min(distance_to_wall_left).min(distance_to_wall_right);
-
-        placement.score += max_points / (distance_to_wall + 1) as i32;
-    }
-}
-
-pub fn evaluate_placement_for_perfect_fit(field: &Field, placements: &mut Vec<Placement>, current_turn: usize, prev_pieces: &Vec<Piece>, player_symbol: (char, char)) {
+pub fn evaluate_placement_for_perfect_fit(field: &Field, placements: &mut Vec<Placement>, current_turn: usize, _prev_pieces: &Vec<Piece>, player_symbol: (char, char)) {
     // Evaluating whether the placement perfectly fills gaps in the field
     // More important late-game (high current_turn)
     let current_score_addition = ((1.07 as f32).powf(current_turn as f32) as i32).min(50);
@@ -158,10 +136,8 @@ pub fn evaluate_placement_for_perfect_fit(field: &Field, placements: &mut Vec<Pl
             }
         }
         if is_perfect_fit {
-            let chance_next_piece_would_fit = check_if_prev_pieces_would_fit(field, &placement.piece, &placement.pos, prev_pieces, player_symbol);
-            let score_multiplier = chance_next_piece_would_fit.powf(4.0);
             // println!("Perfect fit adding {} score to placement at pos {:?}", current_score_addition, placement.pos);
-            placement.score += (current_score_addition as f32 * score_multiplier) as i32;
+            placement.score += (current_score_addition as f32) as i32;
         }
     }
 }
@@ -271,62 +247,6 @@ pub fn get_enclosing_positions(field: &Field, player_symbol: (char, char)) -> Ve
     enclosing_positions
 }
 
-pub fn check_if_prev_pieces_would_fit(field: &Field, piece: &Piece, pos: &Pos, prev_pieces: &Vec<Piece>, player_symbol: (char, char)) -> f32 {
-    // Checks whether any of the previous pieces would fit in the field if the current piece was placed here in order to predict whether the current placement is risky or not
-    // This obviously can't predict perfectly, which is why I return a score multiplier that roughly represents the percentage of the next piece fitting
-    let score_multiplier: f32;
-    let mut next_turn_field = field.clone();
-    let total_prev_pieces = prev_pieces.len();
-    let mut placable_prev_pieces = 0;
-
-    for y in 0..next_turn_field.height() {
-        for x in 0..next_turn_field.width() {
-            if (y as i32 - pos.y as i32) < 0 || (x as i32 - pos.x as i32) < 0 || y - pos.y >= piece.size.height || x - pos.x >= piece.size.width {
-                continue;
-            }
-            let piece_cell = piece.cells()[y - pos.y][x - pos.x];
-            if piece_cell == 'O' {
-                next_turn_field.cells_mut()[y][x] = player_symbol.0;
-            }
-        }
-    }
-
-    for prev_piece in prev_pieces {
-        let mut would_fit = false;
-        'field_y_loop: for field_y in 0..next_turn_field.height() {
-            'field_x_loop: for field_x in 0..next_turn_field.width() {
-                let mut overlap = 0;
-                for (piece_y, row) in prev_piece.trimmed_cells.iter().enumerate() {
-                    for (piece_x, c) in row.iter().enumerate() {
-                        if field_y + piece_y >= next_turn_field.height() || field_x + piece_x >= next_turn_field.width() {
-                            continue;
-                        }
-                        let cell = next_turn_field.cells[field_y + piece_y][field_x + piece_x];
-                        if *c == 'O' && is_player_cell(Some(cell), player_symbol) {
-                            overlap += 1;
-                            if overlap > 1 {
-                                continue 'field_x_loop;
-                            }
-                        } else if *c == 'O' && is_enemy_cell(Some(cell), player_symbol) {
-                            continue 'field_x_loop;
-                        }
-                    }
-                }
-                if overlap == 1 {
-                    would_fit = true;
-                    break 'field_y_loop;
-                }
-            }
-        }
-        if would_fit {
-            placable_prev_pieces += 1;
-        }
-    }
-
-    score_multiplier = placable_prev_pieces as f32 / total_prev_pieces as f32;
-    score_multiplier
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -415,37 +335,6 @@ mod tests {
 
         // The closer placement should have higher score
         assert!(placements[1].score > placements[0].score);
-        // Both should have positive scores
-        assert!(placements[0].score > 0);
-        assert!(placements[1].score > 0);
-    }
-
-    #[test]
-    fn test_evaluate_placement_for_wall_distance() {
-        let field = Field {
-            size: Size {
-                width: 6,
-                height: 6,
-            },
-            cells: vec![
-                vec!['.'; 6],
-                vec!['.'; 6],
-                vec!['.'; 6],
-                vec!['.'; 6],
-                vec!['.'; 6],
-                vec!['.'; 6],
-            ],
-        };
-
-        let mut placements = vec![
-            create_test_placement(Pos { x: 0, y: 0 }, 0), // True corner (distance 0 from walls)
-            create_test_placement(Pos { x: 2, y: 2 }, 0), // Center (distance 2+ from walls)
-        ];
-
-        evaluate_placement_for_wall_distance(&field, &mut placements);
-
-        // Corner placement should have higher score than center
-        assert!(placements[0].score > placements[1].score);
         // Both should have positive scores
         assert!(placements[0].score > 0);
         assert!(placements[1].score > 0);
