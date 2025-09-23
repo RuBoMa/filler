@@ -5,8 +5,6 @@ COPY ./linux_robots		    /filler/linux_robots
 COPY ./m1_robots		    /filler/m1_robots
 COPY ./linux_game_engine	/filler/linux_game_engine
 COPY ./m1_game_engine	    /filler/m1_game_engine
-COPY ./quick_run.sh		    /filler/quick_run.sh
-COPY ./many_matches.sh	    /filler/many_matches.sh
 COPY ./filler_visualizer    /filler/filler_visualizer
 
 WORKDIR /filler/
