@@ -48,6 +48,8 @@ fn main() {
                     match key {
                         Keycode::Right => visualizer.next_turn(),
                         Keycode::Left => visualizer.prev_turn(),
+                        Keycode::Home =>  visualizer.first_turn(),
+                        Keycode::End => visualizer.last_turn(),
                         Keycode::R => {
                             let lines = read_lines_from_file(filename);
                             visualizer = visualizer::Visualizer::new(lines);

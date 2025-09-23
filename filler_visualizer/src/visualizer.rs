@@ -195,6 +195,14 @@ impl Visualizer {
         }
     }
 
+    pub fn first_turn(&mut self) {
+        self.turn = 0;
+    }
+
+    pub fn last_turn(&mut self) {
+        self.turn = self.fields.len() -1;
+    }
+
 }
 
 fn draw_text(

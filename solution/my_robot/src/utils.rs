@@ -113,7 +113,7 @@ pub fn evaluate_placement_for_enemy_distance(field: &Field, placements: &mut Vec
     }
 }
 
-pub fn evaluate_placement_for_perfect_fit(field: &Field, placements: &mut Vec<Placement>, current_turn: usize, _prev_pieces: &Vec<Piece>, player_symbol: (char, char)) {
+pub fn evaluate_placement_for_perfect_fit(field: &Field, placements: &mut Vec<Placement>, current_turn: usize, _prev_pieces: &Vec<Piece>, _player_symbol: (char, char)) {
     // Evaluating whether the placement perfectly fills gaps in the field
     // More important late-game (high current_turn)
     let current_score_addition = ((1.07 as f32).powf(current_turn as f32) as i32).min(50);
