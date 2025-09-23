@@ -8,6 +8,5 @@ COPY ./m1_game_engine	    /filler/m1_game_engine
 COPY ./filler_visualizer    /filler/filler_visualizer
 
 WORKDIR /filler/
-RUN chmod +x /filler/many_matches.sh
 
 ENTRYPOINT /bin/bash

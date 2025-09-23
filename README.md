@@ -19,13 +19,11 @@ The project is designed by the school to run in a Docker container where the gam
 If you wish to test the solution bot locally, you will need:
 - [Rust and Cargo](https://rustup.rs/)
 
-## Docker
-Read the **[instructions](filler_docker.md)** to run the game_engine with Docker.
+## Docker [instructions](filler_docker.md)
 In the instructions, we provide commands that bind the local directories to the container directories.
 This allows us to easily access the solution code, maps, and logs from the host machine.
 
-## Visualizer
-Read the **[instructions](./filler_visualizer/README.md)** for visualizer.
+## Visualizer [instructions](./filler_visualizer/README.md)
 Using the log files generated from the game engine, the visualizer can replay the game step by step.
 
 ## Understanding the setup
@@ -66,8 +64,10 @@ And the bot has to respond with the coordinates where it wants to place the piec
 ```
 
 The game_engine will validate the move and update the map accordingly before sending the updated map and the next piece to the next bot.
+
 If the game_engine detects an invlaid move, the bot responsible will not be able to make any more moves while the other bot can continue to play until there are no more valid moves for either bot.
-It a bot crashes or fails to respond in time, it loses the game.
+
+If a bot crashes or fails to respond in time, it loses the game.
 
 ## Commands for audits
 For M1 Macs
@@ -99,8 +99,8 @@ For M1 Macs
 ./linux_game_engine -f maps/map02 -p1 solution/my_robot/target/release/my_robot -p2 linux_robots/bender > /filler/logs/game_log.txt 2>&1
 ./linux_game_engine -f maps/map02 -p2 solution/my_robot/target/release/my_robot -p1 linux_robots/bender > /filler/logs/game_log.txt 2>&1
 
-./linux_game_engine -f maps/map02 -p1 solution/my_robot/target/release/my_robot -p2 linux_robots/terminator > /filler/logs/game_log.txt 2>&1
-./linux_game_engine -f maps/map02 -p2 solution/my_robot/target/release/my_robot -p1 linux_robots/terminator > /filler/logs/game_log.txt 2>&1
+./linux_game_engine -f maps/map00 -p1 solution/my_robot/target/release/my_robot -p2 linux_robots/terminator > /filler/logs/game_log.txt 2>&1
+./linux_game_engine -f maps/map00 -p2 solution/my_robot/target/release/my_robot -p1 linux_robots/terminator > /filler/logs/game_log.txt 2>&1
 ```
 ## Collaborators 
 - Allen [@AllenLeeyn](https://github.com/AllenLeeyn)
